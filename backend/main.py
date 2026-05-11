@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
@@ -19,16 +20,23 @@ mongo_uri = os.getenv("MONGO_URI")
 client = MongoClient(mongo_uri)
 
 db = client["sample_mflix"]
-collection = db["movies"]
+sample_movies = db["movies"]
+user_movies = db["user_movies"]
 
-@app.get("/")
-def home():
-    return {"message": "backend works"}
+class Movie(BaseModel):
+    title: str
+    year: int
+    genres: list[str]
+
+@app.post("/movies")
+def create_movie(movie: Movie):
+    user_movies.insert_one(movie.dict())
+    return {"message": "Movie created"}
 
 @app.get("/movies")
 def get_movies():
     movies = list(
-        collection.find(
+        sample_movies.find(
             {},
             {
                 "_id": 0,
@@ -38,8 +46,24 @@ def get_movies():
             }
         ).limit(20)
     )
-
     return movies
+
+@app.get("/all-movies")
+def get_all_movies():
+    sample_data = list(
+        sample_movies.find(
+            {},
+            {"_id": 0, "title": 1, "year": 1, "genres": 1}
+        ).limit(10)
+    )
+    user_data = list(
+        user_movies.find(
+            {},
+            {"_id": 0, "title": 1, "year": 1, "genres": 1}
+        )
+    )
+    combined = sample_data + user_data
+    return combined
 
 # @app.get("/test-db")
 # def test_db():
