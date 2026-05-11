@@ -1,0 +1,11 @@
+Start Front-End 
+cd frontend 
+pnpm dev
+
+Git-Bash
+Start Back-End
+cd backend
+source venv/Scripts/activate
+uvicorn main:app --reload
+
+deactivate
