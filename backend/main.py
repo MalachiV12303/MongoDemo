@@ -1,3 +1,4 @@
+from bson import ObjectId
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -22,6 +23,8 @@ client = MongoClient(mongo_uri)
 db = client["sample_mflix"]
 sample_movies = db["movies"]
 user_movies = db["user_movies"]
+
+
 
 class Movie(BaseModel):
     title: str
@@ -49,22 +52,57 @@ def get_movies():
     return movies
 
 @app.get("/all-movies")
-def get_all_movies():
+def get_all_movies(
+    title: str = None,
+    year: int = None,
+    genre: str = None
+):
+    query = {}
+    if title:
+        query["title"] = {
+            "$regex": title,
+            "$options": "i"
+        }
+    if year:
+        query["year"] = {
+            "$gte": year
+        }
+    if genre:
+        query["genres"] = {
+            "$regex": genre,
+            "$options": "i"
+        }
     sample_data = list(
         sample_movies.find(
-            {},
-            {"_id": 0, "title": 1, "year": 1, "genres": 1}
-        ).limit(10)
+            query,
+            {"title": 1, "year": 1, "genres": 1}
+        ).limit(20)
     )
     user_data = list(
         user_movies.find(
-            {},
-            {"_id": 0, "title": 1, "year": 1, "genres": 1}
+            query,
+            {"title": 1, "year": 1, "genres": 1}
         )
     )
-    combined = sample_data + user_data
+    for movie in sample_data:
+        movie["_id"] = str(movie["_id"])
+        movie["source"] = "sample"
+    for movie in user_data:
+        movie["_id"] = str(movie["_id"])
+        movie["source"] = "user"
+    combined = user_data + sample_data
     return combined
 
+@app.delete("/movies/{movie_id}")
+def delete_movie(movie_id: str):
+    result = user_movies.delete_one(
+        {"_id": ObjectId(movie_id)}
+    )
+
+    if result.deleted_count == 0:
+        return {"message": "Movie not found"}
+
+    return {"message": "Movie deleted successfully"}
 # @app.get("/test-db")
 # def test_db():
 #     collection.insert_one({"name": "test user"})
