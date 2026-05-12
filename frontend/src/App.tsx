@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { fetchMovies } from "./lib/api";
+import AddMovie from "./components/AddMovie";
+import SearchMovies from "./components/SearchMovies";
+import DataTable from "./components/DataTable";
 
-type Movie = {
+export type Movie = {
   _id: string;
   title: string;
   year: number;
@@ -11,247 +14,56 @@ type Movie = {
 
 function App() {
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [title, setTitle] = useState("");
-  const [year, setYear] = useState("");
-  const [genre, setGenre] = useState("");
-  const [searchTitle, setSearchTitle] = useState("");
-  const [searchYear, setSearchYear] = useState("");
-  const [searchGenre, setSearchGenre] = useState("");
-  const [resultLimit, setResultLimit] = useState("");
-  const [editedYears, setEditedYears] = useState<Record<string, string>>({});
-  const [editedNames, setEditedNames] = useState<Record<string, string>>({});
+  const [searchTitle, setSearchTitle] = useState("")
+  const [lowerSearchYear, setLowerSearchYear] = useState("")
+  const [upperSearchYear, setUpperSearchYear] = useState("")
+  const [searchGenre, setSearchGenre] = useState<string[]>([])
+  const [sampleResultLimit, setSampleResultLimit] = useState("20")
+  const [userResultLimit, setUserResultLimit] = useState("20")
 
-
-  const handleYearChange = (id: string, value: string) => {
-    setEditedYears((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-  };
-
-  const handleNameChange = (id: string, value: string) => {
-    setEditedNames((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-  };
-
-  const handleUpdate = async (id: string) => {
-    try {
-      const updatedYear = editedYears[id];
-      const updatedName = editedNames[id];
-
-      const payload: Record<string, any> = {};
-
-      if (updatedYear !== undefined) {
-        payload.year = Number(updatedYear);
-      }
-
-      if (updatedName !== undefined) {
-        payload.title = updatedName;
-      }
-
-      await axios.patch(
-        `http://localhost:8000/movies/${id}`,
-        payload
-      );
-
-      setEditedYears((prev) => {
-        const updated = { ...prev };
-        delete updated[id];
-        return updated;
-      });
-
-      setEditedNames((prev) => {
-        const updated = { ...prev };
-        delete updated[id];
-        return updated;
-      });
-
-      fetchMovies();
-    } catch (error) {
-      console.error("Update failed:", error);
-    }
-  };
-
-  const fetchMovies = async () => {
-    const params: Record<string, string> = {};
-
-    if (searchTitle) params.title = searchTitle;
-    if (searchYear) params.year = searchYear;
-    if (searchGenre) params.genre = searchGenre;
-    if (resultLimit) params.resultLimit = resultLimit;
-
-    const res = await axios.get(
-      "http://localhost:8000/all-movies",
-      { params }
-    );
-
-    setMovies(res.data);
-  };
+  const refreshMovies = async () => {
+    const data = await fetchMovies(
+      searchTitle,
+      lowerSearchYear,
+      upperSearchYear,
+      searchGenre,
+      userResultLimit,
+      sampleResultLimit
+    )
+    setMovies(data)
+  }
 
   useEffect(() => {
-    fetchMovies();
+    refreshMovies();
   }, []);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    await axios.post("http://localhost:8000/movies", {
-      title,
-      year: Number(year),
-      genres: genre.split(", "),
-    });
-
-    setTitle("");
-    setYear("");
-    setGenre("");
-
-    fetchMovies();
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      await axios.delete(`http://localhost:8000/movies/${id}`);
-      fetchMovies();
-    } catch (error) {
-      console.error("Error deleting movie:", error);
-    }
-  };
 
   return (
     <main className="container mb-16">
-      <nav className="flex items-center justify-between h-16">
+      <nav className="flex items-center justify-between h-20">
         <h1 className="text-2xl font-semibold">demo-project</h1>
       </nav>
-      <section className="mt-16">
+      <section className="">
         <div className="grid grid-cols-3 gap-4">
-          <form className="border border-foreground p-4 flex flex-col gap-2" onSubmit={handleSubmit}>
-            <span className="text-lg">add a movie to users_movies</span>
-            <input
-              className="bg-background rounded-lg"
-              placeholder="Movie Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            <input
-              placeholder="Year"
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
-            />
-            <input
-              placeholder="Genre"
-              value={genre}
-              onChange={(e) => setGenre(e.target.value)}
-            />
-            <button className="bg-primary hover:bg-primary-muted transition-colors py-1" type="submit">.post</button>
-          </form>
-          <div className="border border-foreground p-4 flex flex-col gap-2">
-            <span className="text-lg">search movies and user_movies</span>
-            <input
-              placeholder="Search title"
-              value={searchTitle}
-              onChange={(e) => setSearchTitle(e.target.value)}
-            />
-            <input
-              placeholder="Year after..."
-              value={searchYear}
-              onChange={(e) => setSearchYear(e.target.value)}
-            />
-            <input
-              placeholder="Genre"
-              value={searchGenre}
-              onChange={(e) => setSearchGenre(e.target.value)}
-            />
-            <button
-              onClick={fetchMovies}
-              className="bg-primary hover:bg-primary-muted transition-colors py-1"
-            >
-              .get
-            </button>
-          </div>
-          <div className="border border-foreground p-4 flex flex-col gap-2">
-            <span className="text-lg">limit results</span>
-            <input
-              placeholder="Result Limit"
-              value={resultLimit}
-              onChange={(e) => setResultLimit(e.target.value)}
-            />
-            <button
-              onClick={fetchMovies}
-              className="bg-primary hover:bg-primary-muted transition-colors py-1 mt-auto"
-            >
-              .get
-            </button>
-          </div>
+          <SearchMovies
+            searchTitle={searchTitle}
+            setSearchTitle={setSearchTitle}
+            lowerSearchYear={lowerSearchYear}
+            setLowerSearchYear={setLowerSearchYear}
+            upperSearchYear={upperSearchYear}
+            setUpperSearchYear={setUpperSearchYear}
+            searchGenre={searchGenre}
+            setSearchGenre={setSearchGenre}
+            userResultLimit={userResultLimit}
+            setUserResultLimit={setUserResultLimit}
+            sampleResultLimit={sampleResultLimit}
+            setSampleResultLimit={setSampleResultLimit}
+            refreshMovies={refreshMovies} />
+          <AddMovie refreshMovies={refreshMovies}/>
         </div>
       </section>
       <section className="mt-16">
-        <div className="flex flex-col">
-          <p className="grid grid-cols-6 gap-2 border-b border-foreground">
-            <span className="col-span-2">title</span>
-            <span>release year</span>
-            <span className="col-span-2">genres</span>
-          </p>
-          {movies.map((movie) => {
-            const hasYearEdit = editedYears[movie._id] !== undefined;
-            const hasNameEdit = editedNames[movie._id] !== undefined;
-            const hasEdits = hasYearEdit || hasNameEdit;
-            return (
-              <div className="grid grid-cols-6 gap-2 items-center py-2 border-foreground-muted border-b" key={movie._id}>
-                <h3 className="col-span-2"><input
-                  type="text"
-                  value={editedNames[movie._id] ?? movie.title}
-                  onChange={(e) =>
-                    handleNameChange(movie._id, e.target.value)
-                  }
-                  disabled={movie.source !== "user"}
-                  className={`px-2 py-1 border border-foreground-muted disabled:border-0 ${editedNames[movie._id]
-                    ? "text-primary"
-                    : "text-white"
-                    }`}
-                /></h3>
-                <input
-                  type="number"
-                  value={editedYears[movie._id] ?? movie.year}
-                  onChange={(e) =>
-                    handleYearChange(movie._id, e.target.value)
-                  }
-                  disabled={movie.source !== "user"}
-                  className={`hide-arrows px-2 py-1 border border-foreground-muted disabled:border-0 ${editedYears[movie._id]
-                    ? "text-primary"
-                    : "text-white"
-                    }`}
-                />
-                <p className="col-span-2">
-                  {movie.genres?.join(", ") || "No genres listed"}
-                </p>
-                {movie.source === "user" ? (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleDelete(movie._id)}
-                      className="bg-primary hover:bg-primary-muted transition-colors px-2 w-full"
-                    >
-                      .delete
-                    </button>
-
-                    {hasEdits && (
-                      <button
-                        onClick={() => handleUpdate(movie._id)}
-                        className="bg-primary hover:bg-primary-muted transition-colors px-2 w-full"
-                      >
-                        .patch
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <span>sample data</span>
-                )}
-              </div>
-            )
-          }
-          )}
-        </div>
+        <span>returned: {movies.length}</span>
+        <DataTable movies={movies} refreshMovies={refreshMovies} />
       </section>
     </main>
   );

@@ -11,50 +11,38 @@ def create_movie(movie: Movie):
     user_movies.insert_one(movie.dict())
     return {"message": "Movie created"}
 
-# READ SAMPLE MOVIES
+# READ / FILTER
 @router.get("/movies")
-def get_movies():
-    movies = list(
-        sample_movies.find(
-            {},
-            {
-                "_id": 0,
-                "title": 1,
-                "year": 1,
-                "genres": 1
-            }
-        ).limit(20)
-    )
-
-    return movies
-
-# ADVANCED READ / FILTER
-@router.get("/all-movies")
-def get_all_movies(
+def get_movies(
     title: str = None,
-    year: int = None,
+    lowerYear: int = None,
+    upperYear: int = None,
     genre: str = None,
-    resultLimit: int = 20
+    userResultLimit: int = 20,
+    sampleResultLimit: int = 20
 ):
     query = {}
-
+    genres = [g.strip() for g in genre.split(",")] if genre else None
+    print("genres:", genres)
     if title:
         query["title"] = {
             "$regex": title,
             "$options": "i"
         }
 
-    if year:
-        query["year"] = {
-            "$gte": year
-        }
+    if lowerYear or upperYear:
+        query["year"] = {}
+        if lowerYear:
+            query["year"]["$gte"] = lowerYear
+        if upperYear:
+            query["year"]["$lte"] = upperYear
 
-    if genre:
+    if genres:
+        print("adding genres to query:", genres)
         query["genres"] = {
-            "$regex": genre,
-            "$options": "i"
+            "$in": genres
         }
-
+    
     sample_data = list(
         sample_movies.find(
             query,
@@ -63,7 +51,7 @@ def get_all_movies(
                 "year": 1,
                 "genres": 1
             }
-        ).limit(resultLimit)
+        ).limit(sampleResultLimit)
     )
 
     user_data = list(
@@ -74,7 +62,7 @@ def get_all_movies(
                 "year": 1,
                 "genres": 1
             }
-        )
+        ).limit(userResultLimit)
     )
 
     for movie in sample_data:
