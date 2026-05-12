@@ -2,17 +2,18 @@ Live Demo: not live yet
 Started: May 2026
 
 # Starting Dev Server
+Will need own .env with MongoDB Atlas url
 
-Start Front-End 
-cd frontend 
-pnpm dev
+### Start Front-End  
+cd frontend  
+pnpm dev  
 
-Start Back-End
-cd backend
-source venv/Scripts/activate
-uvicorn main:app --reload
+### Start Back-End  
+cd backend  
+source venv/Scripts/activate  
+uvicorn main:app --reload  
 
-deactivate
+deactivate  
 
 # Making Full-Stack Application
 ## Tech Stack
