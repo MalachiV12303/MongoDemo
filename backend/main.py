@@ -58,7 +58,8 @@ def get_movies():
 def get_all_movies(
     title: str = None,
     year: int = None,
-    genre: str = None
+    genre: str = None,
+    resultLimit: int = 20,
 ):
     query = {}
     if title:
@@ -79,7 +80,7 @@ def get_all_movies(
         sample_movies.find(
             query,
             {"title": 1, "year": 1, "genres": 1}
-        ).limit(20)
+        ).limit(resultLimit)
     )
     user_data = list(
         user_movies.find(

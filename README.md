@@ -1,3 +1,6 @@
+Live Demo: not live yet  
+Started: May 2026
+
 # Starting Dev Server
 
 Start Front-End 
@@ -10,3 +13,15 @@ source venv/Scripts/activate
 uvicorn main:app --reload
 
 deactivate
+
+# Making Full-Stack Application
+## Tech Stack
+**Frontend:**
+- React
+- TypeScript
+- Tailwind CSS
+
+**Backend:**
+- FastAPI
+- Python
+- MongoDB Atlas

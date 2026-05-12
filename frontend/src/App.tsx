@@ -17,6 +17,7 @@ function App() {
   const [searchTitle, setSearchTitle] = useState("");
   const [searchYear, setSearchYear] = useState("");
   const [searchGenre, setSearchGenre] = useState("");
+  const [resultLimit, setResultLimit] = useState("");
   const [editedYears, setEditedYears] = useState<Record<string, string>>({});
 
   const handleYearChange = (id: string, value: string) => {
@@ -56,6 +57,7 @@ function App() {
     if (searchTitle) params.title = searchTitle;
     if (searchYear) params.year = searchYear;
     if (searchGenre) params.genre = searchGenre;
+    if (resultLimit) params.resultLimit = resultLimit;
 
     const res = await axios.get(
       "http://localhost:8000/all-movies",
@@ -145,15 +147,26 @@ function App() {
               .get
             </button>
           </div>
-          <div className="border border-foreground p-4">
-            <span className="text-lg">placeholder...</span>
+          <div className="border border-foreground p-4 flex flex-col gap-2">
+            <span className="text-lg">limit results</span>
+            <input
+              placeholder="Result Limit"
+              value={resultLimit}
+              onChange={(e) => setResultLimit(e.target.value)}
+            />
+            <button
+              onClick={fetchMovies}
+              className="bg-primary hover:bg-primary-muted transition-colors py-1 mt-auto"
+            >
+              .get
+            </button>
           </div>
         </div>
       </section>
       <section className="mt-16">
         <div className="flex flex-col">
           <p className="grid grid-cols-6 gap-2 border-b border-foreground">
-            <span className="col-span-3">title</span>
+            <span className="col-span-2">title</span>
             <span>release year</span>
             <span className="col-span-2">genres</span>
           </p>
