@@ -11,7 +11,7 @@ pnpm dev
 ### Start Back-End  
 cd backend  
 source venv/Scripts/activate  
-uvicorn main:app --reload  
+uvicorn app.main:app --reload  
 
 deactivate  
 
