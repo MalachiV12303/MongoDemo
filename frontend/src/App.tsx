@@ -19,6 +19,8 @@ function App() {
   const [searchGenre, setSearchGenre] = useState("");
   const [resultLimit, setResultLimit] = useState("");
   const [editedYears, setEditedYears] = useState<Record<string, string>>({});
+  const [editedNames, setEditedNames] = useState<Record<string, string>>({});
+
 
   const handleYearChange = (id: string, value: string) => {
     setEditedYears((prev) => ({
@@ -27,15 +29,31 @@ function App() {
     }));
   };
 
+  const handleNameChange = (id: string, value: string) => {
+    setEditedNames((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
   const handleUpdate = async (id: string) => {
     try {
       const updatedYear = editedYears[id];
+      const updatedName = editedNames[id];
+
+      const payload: Record<string, any> = {};
+
+      if (updatedYear !== undefined) {
+        payload.year = Number(updatedYear);
+      }
+
+      if (updatedName !== undefined) {
+        payload.title = updatedName;
+      }
 
       await axios.patch(
         `http://localhost:8000/movies/${id}`,
-        {
-          year: Number(updatedYear)
-        }
+        payload
       );
 
       setEditedYears((prev) => {
@@ -44,8 +62,13 @@ function App() {
         return updated;
       });
 
-      fetchMovies();
+      setEditedNames((prev) => {
+        const updated = { ...prev };
+        delete updated[id];
+        return updated;
+      });
 
+      fetchMovies();
     } catch (error) {
       console.error("Update failed:", error);
     }
@@ -99,7 +122,7 @@ function App() {
   return (
     <main className="container mb-16">
       <nav className="flex items-center justify-between h-16">
-        <h1 className="text-2xl font-semibold">demoproject</h1>
+        <h1 className="text-2xl font-semibold">demo-project</h1>
       </nav>
       <section className="mt-16">
         <div className="grid grid-cols-3 gap-4">
@@ -170,47 +193,64 @@ function App() {
             <span>release year</span>
             <span className="col-span-2">genres</span>
           </p>
-          {movies.map((movie) => (
-            <div className="grid grid-cols-6 gap-2 items-center py-2 border-foreground-muted border-b" key={movie._id}>
-              <h3 className="col-span-2">{movie.title}</h3>
-              <input
-                type="number"
-                value={editedYears[movie._id] ?? movie.year}
-                onChange={(e) =>
-                  handleYearChange(movie._id, e.target.value)
-                }
-                disabled={movie.source !== "user"}
-                className={`hide-arrows px-2 py-1 border border-foreground-muted disabled:border-0 ${editedYears[movie._id]
-                  ? "text-primary"
-                  : "text-white"
-                  }`}
-              />
-              <p className="col-span-2">
-                {movie.genres?.join(", ") || "No genres listed"}
-              </p>
-              {movie.source === "user" ? (
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleDelete(movie._id)}
-                    className="bg-primary hover:bg-primary-muted transition-colors px-2 w-full"
-                  >
-                    .delete
-                  </button>
-
-                  {editedYears[movie._id] && (
+          {movies.map((movie) => {
+            const hasYearEdit = editedYears[movie._id] !== undefined;
+            const hasNameEdit = editedNames[movie._id] !== undefined;
+            const hasEdits = hasYearEdit || hasNameEdit;
+            return (
+              <div className="grid grid-cols-6 gap-2 items-center py-2 border-foreground-muted border-b" key={movie._id}>
+                <h3 className="col-span-2"><input
+                  type="text"
+                  value={editedNames[movie._id] ?? movie.title}
+                  onChange={(e) =>
+                    handleNameChange(movie._id, e.target.value)
+                  }
+                  disabled={movie.source !== "user"}
+                  className={`px-2 py-1 border border-foreground-muted disabled:border-0 ${editedNames[movie._id]
+                    ? "text-primary"
+                    : "text-white"
+                    }`}
+                /></h3>
+                <input
+                  type="number"
+                  value={editedYears[movie._id] ?? movie.year}
+                  onChange={(e) =>
+                    handleYearChange(movie._id, e.target.value)
+                  }
+                  disabled={movie.source !== "user"}
+                  className={`hide-arrows px-2 py-1 border border-foreground-muted disabled:border-0 ${editedYears[movie._id]
+                    ? "text-primary"
+                    : "text-white"
+                    }`}
+                />
+                <p className="col-span-2">
+                  {movie.genres?.join(", ") || "No genres listed"}
+                </p>
+                {movie.source === "user" ? (
+                  <div className="flex gap-2">
                     <button
-                      onClick={() => handleUpdate(movie._id)}
+                      onClick={() => handleDelete(movie._id)}
                       className="bg-primary hover:bg-primary-muted transition-colors px-2 w-full"
                     >
-                      .patch
+                      .delete
                     </button>
-                  )}
-                </div>
-              ) : (
-                <span>sample data</span>
-              )}
-            </div>
-          ))}
+
+                    {hasEdits && (
+                      <button
+                        onClick={() => handleUpdate(movie._id)}
+                        className="bg-primary hover:bg-primary-muted transition-colors px-2 w-full"
+                      >
+                        .patch
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <span>sample data</span>
+                )}
+              </div>
+            )
+          }
+          )}
         </div>
       </section>
     </main>

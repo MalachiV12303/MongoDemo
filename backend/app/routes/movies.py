@@ -11,7 +11,7 @@ def create_movie(movie: Movie):
     user_movies.insert_one(movie.dict())
     return {"message": "Movie created"}
 
-# READ
+# READ SAMPLE MOVIES
 @router.get("/movies")
 def get_movies():
     movies = list(
@@ -93,12 +93,21 @@ def get_all_movies(
 # UPDATE
 @router.patch("/movies/{movie_id}")
 def update_movie(movie_id: str, movie: MovieUpdate):
+    update_data = {}
+
+    if movie.title is not None:
+        update_data["title"] = movie.title
+
+    if movie.year is not None:
+        update_data["year"] = movie.year
+
+    if not update_data:
+        return {"message": "No fields provided to update"}
+
     result = user_movies.update_one(
         {"_id": ObjectId(movie_id)},
         {
-            "$set": {
-                "year": movie.year
-            }
+            "$set": update_data
         }
     )
 
