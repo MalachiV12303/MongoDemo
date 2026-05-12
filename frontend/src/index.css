@@ -9,12 +9,28 @@
   --color-background-muted: #0e0e0e;
   --color-foreground: #ededed;
   --color-foreground-muted: #3b3b3b;
+
+
 }
 
-html{
+@layer utilities {
+  .hide-arrows {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+
+  .hide-arrows::-webkit-outer-spin-button,
+  .hide-arrows::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+html {
   background-color: var(--color-background);
   color: var(--color-foreground);
 }
+
 .container {
   width: 100%;
   margin-left: auto;

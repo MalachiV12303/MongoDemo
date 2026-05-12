@@ -24,18 +24,21 @@ db = client["sample_mflix"]
 sample_movies = db["movies"]
 user_movies = db["user_movies"]
 
-
+class MovieUpdate(BaseModel):
+    year: int
 
 class Movie(BaseModel):
     title: str
     year: int
     genres: list[str]
 
+#CREATE
 @app.post("/movies")
 def create_movie(movie: Movie):
     user_movies.insert_one(movie.dict())
     return {"message": "Movie created"}
 
+#READ
 @app.get("/movies")
 def get_movies():
     movies = list(
@@ -93,6 +96,22 @@ def get_all_movies(
     combined = user_data + sample_data
     return combined
 
+#UPDATE - patch updates one field, put replaces all
+@app.patch("/movies/{movie_id}")
+def update_movie(movie_id: str, movie: MovieUpdate):
+    result = user_movies.update_one(
+        {"_id": ObjectId(movie_id)},
+        {
+            "$set": {
+                "year": movie.year
+            }
+        }
+    )
+    if result.matched_count == 0:
+        return {"message": "Movie not found"}
+    return {"message": "Movie updated successfully"}
+
+#DELETE
 @app.delete("/movies/{movie_id}")
 def delete_movie(movie_id: str):
     result = user_movies.delete_one(
