@@ -79,6 +79,8 @@ export type DecodedUser = {
   email: string;
   role: "admin" | "user";
   exp: number;
+  sub?: string;
+  id?: string;
 };
 
 export const getCurrentUser = (): DecodedUser | null => {

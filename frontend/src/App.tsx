@@ -13,6 +13,7 @@ export type Movie = {
   year: number;
   genres: string[];
   source: string;
+  ownerEmail?: string;
 };
 
 function App() {

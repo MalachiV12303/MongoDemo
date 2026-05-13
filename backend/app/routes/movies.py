@@ -81,7 +81,8 @@ def get_movies(
                 {
                     "title": 1,
                     "year": 1,
-                    "genres": 1
+                    "genres": 1,
+                    "owner_email": 1
                 }
             ).limit(userResultLimit)
         )
@@ -91,6 +92,8 @@ def get_movies(
     for movie in user_data:
         movie["_id"] = str(movie["_id"])
         movie["source"] = "user"
+        if "owner_email" in movie:
+            movie["ownerEmail"] = movie.pop("owner_email")
     combined = user_data + sample_data
     return combined
 

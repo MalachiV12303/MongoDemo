@@ -90,6 +90,10 @@ export default function Login() {
                             <span>email: malachiadmin@demo.com</span>
                             <span>pass: password1234</span>
                         </div>
+                        <div className="flex flex-col">
+                            <span>email: malachitwo@demo.com</span>
+                            <span>pass: password12</span>
+                        </div>
                     </div>
                 </div>
                 <span className="ml-auto">current role: {userRole}</span>
