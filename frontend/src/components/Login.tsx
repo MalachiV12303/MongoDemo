@@ -70,14 +70,14 @@ export default function Login() {
                     onClick={handleLogin}
                     className="h-min bg-primary hover:bg-primary-muted transition-colors text-foreground px-3 py-1"
                 >
-                    Login
+                    login
                 </button>
 
                 <button
                     onClick={handleLogout}
                     className="h-min bg-primary hover:bg-primary-muted transition-colors text-foreground px-3 py-1"
                 >
-                    Logout
+                    logout
                 </button>
                 <div className="ml-2">
                     <span className="text-xs text-foreground-muted">credentials for testing:</span>
