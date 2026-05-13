@@ -1,4 +1,5 @@
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 const api = axios.create({
     baseURL: "http://localhost:8000",
@@ -72,4 +73,21 @@ export const updateMovie = async (
             : `/sample-movies/${id}`;
 
     return api.patch(endpoint, payload);
+};
+
+export type DecodedUser = {
+  email: string;
+  role: "admin" | "user";
+  exp: number;
+};
+
+export const getCurrentUser = (): DecodedUser | null => {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+
+  try {
+    return jwtDecode<DecodedUser>(token);
+  } catch {
+    return null;
+  }
 };

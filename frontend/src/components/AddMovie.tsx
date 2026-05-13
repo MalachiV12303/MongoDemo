@@ -50,7 +50,7 @@ export default function AddMovie({ refreshMovies }: Props) {
                     value={year}
                     onChange={(e) => setYear(e.target.value)}
                 />
-
+                
                 <input
                     className="border-b border-foreground focus:outline-none"
                     placeholder="genre"

@@ -60,7 +60,7 @@ export default function Login() {
 
                 <input
                     placeholder="password"
-                    type="password"
+                    type="text"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="h-min border-b border-foreground block focus:outline-none"

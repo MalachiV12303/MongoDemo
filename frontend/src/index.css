@@ -2,8 +2,8 @@
 @import "tailwindcss";
 
 :root {
-  --app-primary: #a1abff;
-  --app-primary-muted: #828eff;
+  --app-primary: #d61c1c;
+  --app-primary-muted: #ed2f2f;
   --app-background: #d4d4d4;
   --app-background-muted: #9a9a9a;
   --app-foreground: #060606;

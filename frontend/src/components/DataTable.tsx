@@ -1,6 +1,7 @@
 import { useState } from "react"
 import axios from "axios"
 import type { Movie } from "../App";
+import { getCurrentUser } from "../lib/api";
 
 type SortField = "title" | "year" | null;
 type SortDirection = "asc" | "desc" | null;
@@ -174,6 +175,11 @@ export default function DataTable({ movies, refreshMovies }: Props) {
         const hasYearEdit = editedYears[movie._id] !== undefined;
         const hasNameEdit = editedNames[movie._id] !== undefined;
         const hasEdits = hasYearEdit || hasNameEdit;
+        const currentUser = getCurrentUser();
+        const isAuthenticated = currentUser !== null;
+        const isAdmin = currentUser?.role === "admin";
+        const canEdit = isAuthenticated && (movie.source === "user" || isAdmin);
+        const canDelete = isAuthenticated && (movie.source === "user" || isAdmin);
         return (
           <div className="grid grid-cols-6 gap-2 items-center py-2 border-foreground-muted border-b" key={movie._id}>
             <h3 className="col-span-2"><input
@@ -182,7 +188,7 @@ export default function DataTable({ movies, refreshMovies }: Props) {
               onChange={(e) =>
                 handleNameChange(movie._id, e.target.value)
               }
-              disabled={movie.source !== "user"}
+              disabled={!canEdit}
               className={`focus:outline-none w-full px-2 py-1 border border-foreground-muted disabled:border-0 ${editedNames[movie._id]
                 ? "text-primary"
                 : "text-foreground"
@@ -194,7 +200,7 @@ export default function DataTable({ movies, refreshMovies }: Props) {
               onChange={(e) =>
                 handleYearChange(movie._id, e.target.value)
               }
-              disabled={movie.source !== "user"}
+              disabled={!canEdit}
               className={`hide-arrows focus:outline-none px-2 py-1 border border-foreground-muted disabled:border-0 ${editedYears[movie._id]
                 ? "text-primary"
                 : "text-foreground"
@@ -204,14 +210,15 @@ export default function DataTable({ movies, refreshMovies }: Props) {
               {movie.genres?.join(", ") || "No genres listed"}
             </p>
             <div className="flex gap-2">
-              <button
-                onClick={() => handleDelete(movie)}
-                className="bg-primary hover:bg-primary-muted transition-colors px-2 w-full"
-              >
-                .delete
-              </button>
-
-              {hasEdits && (
+              {canDelete && (
+                <button
+                  onClick={() => handleDelete(movie)}
+                  className="bg-primary hover:bg-primary-muted transition-colors px-2 w-full"
+                >
+                  .delete
+                </button>
+              )}
+              {canEdit && hasEdits && (
                 <button
                   onClick={() => handleUpdate(movie)}
                   className="bg-primary hover:bg-primary-muted transition-colors px-2 w-full"
