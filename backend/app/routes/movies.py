@@ -61,7 +61,6 @@ def get_movies(
             "$in": genres
         }
     
-    print("tableSelection:", tableSelection)
     sample_data = []
     user_data = []
     if tableSelection == "sample" or tableSelection == "all":
@@ -148,8 +147,7 @@ def update_sample_movie(
     update_data = {
         k: v for k, v in {
             "title": movie.title,
-            "year": movie.year,
-            "genres": movie.genres
+            "year": movie.year
         }.items()
         if v is not None
     }
