@@ -79,18 +79,30 @@ export default function SearchMovies({
                     <option value="sample">movies</option>
                     <option value="user">user_movies</option>
                 </select>
-                <input
-                    className="focus:outline-none border-b border-foreground"
-                    placeholder="sample result limit (default 20)"
-                    value={sampleResultLimit !== "20" ? sampleResultLimit : ""}
-                    onChange={(e) => setSampleResultLimit(e.target.value)}
-                />
-                <input
-                    className="focus:outline-none border-b border-foreground"
-                    placeholder="user result limit (default 20)"
-                    value={userResultLimit !== "20" ? userResultLimit : ""}
-                    onChange={(e) => setUserResultLimit(e.target.value)}
-                />
+                {(tableSelection == "sample" || tableSelection == "all") && (
+                    <div>
+                        <span className="text-sm mr-2">sample result limit:</span>
+                        <input
+                            className="focus:outline-none border-b border-foreground"
+                            placeholder="sample result limit"
+                            value={sampleResultLimit}
+                            onChange={(e) => setSampleResultLimit(e.target.value)}
+                        />
+                    </div>
+                )}
+                {(tableSelection == "user" || tableSelection == "all") && (
+                    <div>
+                        <span className="text-sm mr-2">user result limit:</span>
+                        <input
+                            className="focus:outline-none border-b border-foreground"
+                            placeholder="user result limit"
+                            value={userResultLimit}
+                            onChange={(e) => setUserResultLimit(e.target.value)}
+                        />
+                    </div>
+
+                )}
+
             </div>
             <button
                 onClick={refreshMovies}

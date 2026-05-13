@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createMovie } from "../lib/api";
+import { createMovie, getCurrentUser } from "../lib/api";
 
 type Props = {
     refreshMovies: () => void;
@@ -29,6 +29,8 @@ export default function AddMovie({ refreshMovies }: Props) {
             console.error("Create movie failed:", err);
         }
     };
+    const currentUser = getCurrentUser();
+    const isAdminOrUser = currentUser?.role === "admin" || currentUser?.role === "user";
 
     return (
         <form
@@ -36,36 +38,44 @@ export default function AddMovie({ refreshMovies }: Props) {
             onSubmit={handleSubmit}
         >
             <span className="text-xl">add movie</span>
-            <div className="flex flex-col gap-2">
-                <input
-                    className="border-b border-foreground focus:outline-none"
-                    placeholder="title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                />
+            {!isAdminOrUser && (
+                <p className="text-sm text-foreground">
+                    must be logged in to add movies
+                </p>
+            )}
+            {isAdminOrUser && (
+                <>
+                    <div className="flex flex-col gap-2">
+                        <input
+                            className="border-b border-foreground focus:outline-none"
+                            placeholder="title"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                        />
 
-                <input
-                    className="border-b border-foreground focus:outline-none"
-                    placeholder="year"
-                    value={year}
-                    onChange={(e) => setYear(e.target.value)}
-                />
-                
-                <input
-                    className="border-b border-foreground focus:outline-none"
-                    placeholder="genre"
-                    value={genre}
-                    onChange={(e) => setGenre(e.target.value)}
-                />
-            </div>
+                        <input
+                            className="border-b border-foreground focus:outline-none"
+                            placeholder="year"
+                            value={year}
+                            onChange={(e) => setYear(e.target.value)}
+                        />
 
+                        <input
+                            className="border-b border-foreground focus:outline-none"
+                            placeholder="genre"
+                            value={genre}
+                            onChange={(e) => setGenre(e.target.value)}
+                        />
+                    </div>
 
-            <button
-                className="bg-primary hover:bg-primary-muted py-1"
-                type="submit"
-            >
-                .post
-            </button>
+                    <button
+                        className="bg-primary hover:bg-primary-muted py-1"
+                        type="submit"
+                    >
+                        .post
+                    </button>
+                </>
+            )}
         </form>
     );
 }

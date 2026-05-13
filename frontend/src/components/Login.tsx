@@ -36,14 +36,14 @@ export default function Login() {
 
     const token = localStorage.getItem("token");
 
-    let userRole = "Guest";
+    let userRole = "guest";
 
     if (token) {
         try {
             const decoded = jwtDecode<TokenPayload>(token);
             userRole = decoded.role;
         } catch {
-            userRole = "Guest";
+            userRole = "guest";
         }
     }
 

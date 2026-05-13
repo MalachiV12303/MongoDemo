@@ -1,11 +1,12 @@
 import { useState } from "react"
-import type { Movie } from "../App";
-import { getCurrentUser, deleteMovie, updateMovie } from "../lib/api";
+import type { Movie as MovieType } from "../App";
+import Movie from "./Movie";
+import { deleteMovie, updateMovie } from "../lib/api";
 
 type SortField = "title" | "year" | null;
 type SortDirection = "asc" | "desc" | null;
 type Props = {
-  movies: Movie[]
+  movies: MovieType[]
   refreshMovies: () => Promise<void>
 }
 
@@ -28,7 +29,7 @@ export default function DataTable({ movies, refreshMovies }: Props) {
     }));
   };
 
-  const handleUpdate = async (movie: Movie) => {
+  const handleUpdate = async (movie: MovieType) => {
     try {
       const updatedYear = editedYears[movie._id];
       const updatedName = editedNames[movie._id];
@@ -68,7 +69,7 @@ export default function DataTable({ movies, refreshMovies }: Props) {
     }
   };
 
-  const handleDelete = async (movie: Movie) => {
+  const handleDelete = async (movie: MovieType) => {
     try {
       await deleteMovie(movie._id, movie.source);
       await refreshMovies();
@@ -147,68 +148,18 @@ export default function DataTable({ movies, refreshMovies }: Props) {
         <span>release year</span>
         <span className="col-span-2">genres</span>
       </p>
-      {sortedMovies.map((movie) => {
-        const hasYearEdit = editedYears[movie._id] !== undefined;
-        const hasNameEdit = editedNames[movie._id] !== undefined;
-        const hasEdits = hasYearEdit || hasNameEdit;
-        const currentUser = getCurrentUser();
-        const isAuthenticated = currentUser !== null;
-        const isAdmin = currentUser?.role === "admin";
-        const isOwner = currentUser && movie.ownerEmail === currentUser.email;
-        const canEdit = isAuthenticated && (isAdmin || (movie.source === "user" && isOwner));
-        const canDelete = isAuthenticated && (isAdmin || (movie.source === "user" && isOwner));
-        return (
-          <div className="grid grid-cols-7 gap-2 items-center py-2 border-foreground-muted border-b" key={movie._id}>
-            <span>{movie.ownerEmail ? movie.ownerEmail : "Sample Data"}</span>
-            <h3 className="col-span-2"><input
-              type="text"
-              value={editedNames[movie._id] ?? movie.title}
-              onChange={(e) =>
-                handleNameChange(movie._id, e.target.value)
-              }
-              disabled={!canEdit}
-              className={`focus:outline-none w-full px-2 py-1 border border-foreground-muted disabled:border-0 ${editedNames[movie._id]
-                ? "text-primary"
-                : "text-foreground"
-                }`}
-            /></h3>
-            <input
-              type="number"
-              value={editedYears[movie._id] ?? movie.year}
-              onChange={(e) =>
-                handleYearChange(movie._id, e.target.value)
-              }
-              disabled={!canEdit}
-              className={`hide-arrows focus:outline-none px-2 py-1 border border-foreground-muted disabled:border-0 ${editedYears[movie._id]
-                ? "text-primary"
-                : "text-foreground"
-                }`}
-            />
-            <p className="col-span-2">
-              {movie.genres?.join(", ") || "No genres listed"}
-            </p>
-            <div className="flex gap-2">
-              {canDelete && (
-                <button
-                  onClick={() => handleDelete(movie)}
-                  className="bg-primary hover:bg-primary-muted transition-colors px-2 w-full"
-                >
-                  .delete
-                </button>
-              )}
-              {canEdit && hasEdits && (
-                <button
-                  onClick={() => handleUpdate(movie)}
-                  className="bg-primary hover:bg-primary-muted transition-colors px-2 w-full"
-                >
-                  .patch
-                </button>
-              )}
-            </div>
-          </div>
-        )
-      }
-      )}
+      {sortedMovies.map((movie) => (
+        <Movie
+          key={movie._id}
+          movie={movie}
+          editedYears={editedYears}
+          editedNames={editedNames}
+          onYearChange={handleYearChange}
+          onNameChange={handleNameChange}
+          onUpdate={handleUpdate}
+          onDelete={handleDelete}
+        />
+      ))}
     </div>
   );
 }
