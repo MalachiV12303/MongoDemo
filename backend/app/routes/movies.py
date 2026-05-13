@@ -19,7 +19,8 @@ def get_movies(
     upperYear: int = None,
     genre: str = None,
     userResultLimit: int = 20,
-    sampleResultLimit: int = 20
+    sampleResultLimit: int = 20,
+    tableSelection: str = "all"
 ):
     query = {}
     genres = [g.strip() for g in genre.split(",")] if genre else None
@@ -29,52 +30,50 @@ def get_movies(
             "$regex": title,
             "$options": "i"
         }
-
     if lowerYear or upperYear:
         query["year"] = {}
         if lowerYear:
             query["year"]["$gte"] = lowerYear
         if upperYear:
             query["year"]["$lte"] = upperYear
-
     if genres:
         print("adding genres to query:", genres)
         query["genres"] = {
             "$in": genres
         }
     
-    sample_data = list(
-        sample_movies.find(
-            query,
-            {
-                "title": 1,
-                "year": 1,
-                "genres": 1
-            }
-        ).limit(sampleResultLimit)
-    )
-
-    user_data = list(
-        user_movies.find(
-            query,
-            {
-                "title": 1,
-                "year": 1,
-                "genres": 1
-            }
-        ).limit(userResultLimit)
-    )
-
+    print("tableSelection:", tableSelection)
+    sample_data = []
+    user_data = []
+    if tableSelection == "sample" or tableSelection == "all":
+        sample_data = list(
+            sample_movies.find(
+                query,
+                {
+                    "title": 1,
+                    "year": 1,
+                    "genres": 1
+                }
+            ).limit(sampleResultLimit)
+        )
+    if tableSelection == "user" or tableSelection == "all":
+        user_data = list(
+            user_movies.find(
+                query,
+                {
+                    "title": 1,
+                    "year": 1,
+                    "genres": 1
+                }
+            ).limit(userResultLimit)
+        )
     for movie in sample_data:
         movie["_id"] = str(movie["_id"])
         movie["source"] = "sample"
-
     for movie in user_data:
         movie["_id"] = str(movie["_id"])
         movie["source"] = "user"
-
     combined = user_data + sample_data
-
     return combined
 
 

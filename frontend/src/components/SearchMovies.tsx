@@ -11,6 +11,8 @@ type Props = {
     setUserResultLimit: React.Dispatch<React.SetStateAction<string>>
     sampleResultLimit: string
     setSampleResultLimit: React.Dispatch<React.SetStateAction<string>>
+    tableSelection: string
+    setTableSelection: React.Dispatch<React.SetStateAction<string>>
     refreshMovies: () => void
 }
 
@@ -27,6 +29,8 @@ export default function SearchMovies({
     setUserResultLimit,
     sampleResultLimit,
     setSampleResultLimit,
+    tableSelection,
+    setTableSelection,
     refreshMovies
 }: Props) {
 
@@ -70,6 +74,11 @@ export default function SearchMovies({
                 </span>
             </div>
             <div className="flex flex-col gap-2">
+                <select value={tableSelection} onChange={(e) => { setTableSelection(e.target.value); }} className="border-b border-foreground">
+                    <option value="all">all collections</option>
+                    <option value="sample">movies</option>
+                    <option value="user">user_movies</option>
+                </select>
                 <input
                     className="focus:outline-none border-b border-foreground"
                     placeholder="sample result limit (default 20)"
@@ -85,11 +94,10 @@ export default function SearchMovies({
             </div>
             <button
                 onClick={refreshMovies}
-                className="bg-primary hover:bg-primary-muted transition-colors py-1 col-span-2"
+                className="bg-primary hover:bg-primary-muted transition-colors py-1 mt-auto col-span-2"
             >
                 .get
             </button>
-
         </div>
     );
 }

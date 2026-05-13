@@ -1,14 +1,32 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
 @import "tailwindcss";
 
-@theme {
+:root {
+  --app-primary: #a1abff;
+  --app-primary-muted: #828eff;
+  --app-background: #d4d4d4;
+  --app-background-muted: #9a9a9a;
+  --app-foreground: #060606;
+  --app-foreground-muted: #3b3b3b;
+}
+
+[data-theme="dark"] {
+  --app-primary: #1c38d6;
+  --app-primary-muted: #2f4ced;
+  --app-background: #060606;
+  --app-background-muted: #0e0e0e;
+  --app-foreground: #ededed;
+  --app-foreground-muted: #3b3b3b;
+}
+
+@theme inline {
   --font-sans: "Manrope", sans-serif;
-  --color-primary: #2f4ced;
-  --color-primary-muted: #1c38d6;
-  --color-background: #060606;
-  --color-background-muted: #0e0e0e;
-  --color-foreground: #ededed;
-  --color-foreground-muted: #3b3b3b;
+  --color-primary: var(--app-primary);
+  --color-primary-muted: var(--app-primary-muted);
+  --color-background: var(--app-background);
+  --color-background-muted: var(--app-background-muted);
+  --color-foreground: var(--app-foreground);
+  --color-foreground-muted: var(--app-foreground-muted);
 }
 
 @layer utilities {
