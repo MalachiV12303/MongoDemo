@@ -6,3 +6,4 @@ client = MongoClient(MONGO_URI)
 db = client["sample_mflix"]
 sample_movies = db["movies"]
 user_movies = db["user_movies"]
+users_collection = db["users"]

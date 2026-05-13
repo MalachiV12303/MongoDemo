@@ -28,47 +28,76 @@ export default function DataTable({ movies, refreshMovies }: Props) {
     }));
   };
 
-  const handleUpdate = async (id: string) => {
+  const handleUpdate = async (movie: Movie) => {
     try {
-      const updatedYear = editedYears[id];
-      const updatedName = editedNames[id];
+      const token = localStorage.getItem("token");
+
+      const updatedYear = editedYears[movie._id];
+      const updatedName = editedNames[movie._id];
 
       const payload: Record<string, any> = {};
+
       if (updatedYear !== undefined) {
         payload.year = Number(updatedYear);
       }
+
       if (updatedName !== undefined) {
         payload.title = updatedName;
       }
-      await axios.patch(
-        `http://localhost:8000/movies/${id}`,
-        payload
-      );
+
+      if (Object.keys(payload).length === 0) {
+        return;
+      }
+
+      const endpoint =
+        movie.source === "user"
+          ? `http://localhost:8000/user-movies/${movie._id}`
+          : `http://localhost:8000/sample-movies/${movie._id}`;
+
+      await axios.patch(endpoint, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
 
       setEditedYears((prev) => {
         const updated = { ...prev };
-        delete updated[id];
+        delete updated[movie._id];
         return updated;
       });
 
       setEditedNames((prev) => {
         const updated = { ...prev };
-        delete updated[id];
+        delete updated[movie._id];
         return updated;
       });
 
-      refreshMovies();
+      await refreshMovies();
+
     } catch (error) {
       console.error("Update failed:", error);
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (movie: Movie) => {
     try {
-      await axios.delete(`http://localhost:8000/movies/${id}`);
-      refreshMovies();
+      const token = localStorage.getItem("token");
+
+      const endpoint =
+        movie.source === "user"
+          ? `http://localhost:8000/user-movies/${movie._id}`
+          : `http://localhost:8000/sample-movies/${movie._id}`;
+
+      await axios.delete(endpoint, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      await refreshMovies();
+
     } catch (error) {
-      console.error("Error deleting movie:", error);
+      console.error("Delete failed:", error);
     }
   };
 
@@ -174,27 +203,23 @@ export default function DataTable({ movies, refreshMovies }: Props) {
             <p className="col-span-2">
               {movie.genres?.join(", ") || "No genres listed"}
             </p>
-            {movie.source === "user" ? (
-              <div className="flex gap-2">
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleDelete(movie)}
+                className="bg-primary hover:bg-primary-muted transition-colors px-2 w-full"
+              >
+                .delete
+              </button>
+
+              {hasEdits && (
                 <button
-                  onClick={() => handleDelete(movie._id)}
+                  onClick={() => handleUpdate(movie)}
                   className="bg-primary hover:bg-primary-muted transition-colors px-2 w-full"
                 >
-                  .delete
+                  .patch
                 </button>
-
-                {hasEdits && (
-                  <button
-                    onClick={() => handleUpdate(movie._id)}
-                    className="bg-primary hover:bg-primary-muted transition-colors px-2 w-full"
-                  >
-                    .patch
-                  </button>
-                )}
-              </div>
-            ) : (
-              <span>sample data</span>
-            )}
+              )}
+            </div>
           </div>
         )
       }

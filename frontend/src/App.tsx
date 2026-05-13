@@ -1,9 +1,11 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchMovies } from "./lib/api";
 import AddMovie from "./components/AddMovie";
 import SearchMovies from "./components/SearchMovies";
 import DataTable from "./components/DataTable";
 import ThemeToggle from "./components/ThemeToggle";
+import { jwtDecode } from "jwt-decode";
+import Login from "./components/Login";
 
 export type Movie = {
   _id: string;
@@ -23,7 +25,7 @@ function App() {
   const [userResultLimit, setUserResultLimit] = useState("20")
   const [tableSelection, setTableSelection] = useState("all")
   const [params, setParams] = useState({})
-  
+
   const refreshMovies = async () => {
     const data = await fetchMovies(
       searchTitle,
@@ -43,7 +45,7 @@ function App() {
 
   useEffect(() => {
     setParams({ searchTitle, lowerSearchYear, upperSearchYear, searchGenre, userResultLimit, sampleResultLimit, tableSelection })
-  }, [ searchTitle, searchGenre, lowerSearchYear, upperSearchYear, userResultLimit, sampleResultLimit, tableSelection])
+  }, [searchTitle, searchGenre, lowerSearchYear, upperSearchYear, userResultLimit, sampleResultLimit, tableSelection])
 
   return (
     <main className="container mb-16">
@@ -52,7 +54,8 @@ function App() {
         <ThemeToggle />
       </nav>
       <section className="">
-        <div className="grid grid-cols-3 gap-4">
+        <Login />
+        <div className="grid grid-cols-3 gap-4 mt-4">
           <SearchMovies
             searchTitle={searchTitle}
             setSearchTitle={setSearchTitle}
@@ -69,7 +72,7 @@ function App() {
             tableSelection={tableSelection}
             setTableSelection={setTableSelection}
             refreshMovies={refreshMovies} />
-          <AddMovie refreshMovies={refreshMovies}/>
+          <AddMovie refreshMovies={refreshMovies} />
         </div>
       </section>
       <section className="mt-12">
