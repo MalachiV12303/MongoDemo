@@ -1,16 +1,16 @@
 import { useState } from "react"
 import type { Movie as MovieType } from "../App";
 import Movie from "./Movie";
-import { deleteMovie, updateMovie } from "../lib/api";
 
 type SortField = "title" | "year" | null;
 type SortDirection = "asc" | "desc" | null;
 type Props = {
   movies: MovieType[]
-  refreshMovies: () => Promise<void>
+  onUpdateMovie: (id: string, source: string, payload: any) => void
+  onDeleteMovie: (id: string, source: string) => void
 }
 
-export default function DataTable({ movies, refreshMovies }: Props) {
+export default function DataTable({ movies, onUpdateMovie, onDeleteMovie }: Props) {
   const [editedYears, setEditedYears] = useState<Record<string, string>>({});
   const [editedNames, setEditedNames] = useState<Record<string, string>>({});
   const [editedGenres, setEditedGenres] = useState<Record<string, string>>({});
@@ -61,7 +61,7 @@ export default function DataTable({ movies, refreshMovies }: Props) {
         return;
       }
 
-      await updateMovie(movie._id, movie.source, payload);
+      onUpdateMovie(movie._id, movie.source, payload);
 
       setEditedYears((prev) => {
         const updated = { ...prev };
@@ -81,8 +81,6 @@ export default function DataTable({ movies, refreshMovies }: Props) {
         return updated;
       });
 
-      await refreshMovies();
-
     } catch (error) {
       console.error("Update failed:", error);
     }
@@ -90,8 +88,7 @@ export default function DataTable({ movies, refreshMovies }: Props) {
 
   const handleDelete = async (movie: MovieType) => {
     try {
-      await deleteMovie(movie._id, movie.source);
-      await refreshMovies();
+      onDeleteMovie(movie._id, movie.source);
     } catch (error) {
       console.error("Delete failed:", error);
     }

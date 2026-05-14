@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { createMovie, getCurrentUser } from "../lib/api";
+import { getCurrentUser } from "../lib/api";
 import { yearInvalid, titleInvalid, genreInvalid } from "../lib/validators";
 
 type Props = {
-    refreshMovies: () => void;
+    onCreateMovie: (movie: { title: string; year: number; genres: string[] }) => void;
 };
 
-export default function AddMovie({ refreshMovies }: Props) {
+export default function AddMovie({ onCreateMovie }: Props) {
     const [title, setTitle] = useState("");
     const [year, setYear] = useState("");
     const [genre, setGenre] = useState("");
@@ -21,7 +21,7 @@ export default function AddMovie({ refreshMovies }: Props) {
         if (formInvalid) return;
 
         try {
-            await createMovie({
+            onCreateMovie({
                 title,
                 year: Number(year),
                 genres: genre.split(",").map(g => g.trim()).filter(Boolean),
@@ -30,8 +30,6 @@ export default function AddMovie({ refreshMovies }: Props) {
             setTitle("");
             setYear("");
             setGenre("");
-
-            refreshMovies();
         } catch (err) {
             console.error("Create movie failed:", err);
         }

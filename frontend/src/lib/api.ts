@@ -31,7 +31,7 @@ export const fetchMovies = async (
     if (lowerSearchYear) params.lowerYear = lowerSearchYear;
     if (upperSearchYear) params.upperYear = upperSearchYear;
 
-    if (searchGenre) {
+    if (searchGenre?.length) {
         params.genre = searchGenre
             .map(g => g.charAt(0).toUpperCase() + g.slice(1).toLowerCase())
             .join(",");
