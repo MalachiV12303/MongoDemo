@@ -26,3 +26,7 @@ deactivate
 - FastAPI
 - Python
 - MongoDB Atlas
+
+### TO DO:
+- React Protected Routes
+- Frontend Data Validation, reducing backend calls if frontend data is invalid

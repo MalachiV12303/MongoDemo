@@ -30,7 +30,7 @@ def create_movie(
     user_movies.insert_one(movie_data)
     return {"message": "Movie created"}
 
-# READ / FILTER
+# GET with filtering
 @router.get("/movies")
 def get_movies(
     title: str = None,
@@ -41,9 +41,17 @@ def get_movies(
     sampleResultLimit: int = 20,
     tableSelection: str = "all"
 ):
+    # frontend validation should prevent these, but we check again just in case
+    if lowerYear and lowerYear < 1888:
+        raise HTTPException(status_code=400, detail="Lower year cannot be earlier than 1888")
+    if upperYear and upperYear < 1888:
+        raise HTTPException(status_code=400, detail="Upper year cannot be earlier than 1888")
+    if lowerYear and upperYear and upperYear < lowerYear:
+        raise HTTPException(status_code=400, detail="Upper year cannot be less than lower year")
+    
+    # build the query based on provided filters
     query = {}
     genres = [g.strip() for g in genre.split(",")] if genre else None
-    print("genres:", genres)
     if title:
         query["title"] = {
             "$regex": title,
@@ -56,11 +64,11 @@ def get_movies(
         if upperYear:
             query["year"]["$lte"] = upperYear
     if genres:
-        print("adding genres to query:", genres)
         query["genres"] = {
             "$in": genres
         }
     
+    # fetch from the appropriate collections based on tableSelection
     sample_data = []
     user_data = []
     if tableSelection == "sample" or tableSelection == "all":
@@ -86,6 +94,8 @@ def get_movies(
                 }
             ).limit(userResultLimit)
         )
+
+    # convert ObjectId to string and add source field to indicate which collection the movie came from for frontend display purposes
     for movie in sample_data:
         movie["_id"] = str(movie["_id"])
         movie["source"] = "sample"
