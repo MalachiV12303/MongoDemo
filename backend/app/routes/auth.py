@@ -1,13 +1,15 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from app.database import users_collection
 from app.models.user import UserCreate, UserLogin
 from app.auth.hashing import hash_password, verify_password
 from app.auth.jwt_handler import create_access_token
+from app.limiter import limiter
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 @router.post("/register")
-def register(user: UserCreate):
+@limiter.limit("5/minute")
+def register(request: Request, user: UserCreate):
     existing = users_collection.find_one(
         {"email": user.email}
     )
@@ -28,7 +30,8 @@ def register(user: UserCreate):
     return {"message": "User created"}
 
 @router.post("/login")
-def login(user: UserLogin):
+@limiter.limit("10/minute")
+def login(request: Request, user: UserLogin):
     db_user = users_collection.find_one(
         {"email": user.email}
     )

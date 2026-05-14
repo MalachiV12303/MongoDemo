@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { getCurrentUser } from "../lib/api";
 import { yearInvalid, titleInvalid, genreInvalid } from "../lib/validators";
 
 type Props = {
     onCreateMovie: (movie: { title: string; year: number; genres: string[] }) => void;
+    isLoading: boolean;
 };
 
-export default function AddMovie({ onCreateMovie }: Props) {
+export default function AddMovie({ onCreateMovie, isLoading }: Props) {
     const [title, setTitle] = useState("");
     const [year, setYear] = useState("");
     const [genre, setGenre] = useState("");
@@ -34,8 +34,6 @@ export default function AddMovie({ onCreateMovie }: Props) {
             console.error("Create movie failed:", err);
         }
     };
-    const currentUser = getCurrentUser();
-    const isAdminOrUser = currentUser?.role === "admin" || currentUser?.role === "user";
 
     return (
         <form
@@ -43,46 +41,35 @@ export default function AddMovie({ onCreateMovie }: Props) {
             onSubmit={handleSubmit}
         >
             <span className="text-xl">add movie</span>
-            {!isAdminOrUser && (
-                <p className="text-sm text-foreground">
-                    must be logged in to add movies
-                </p>
-            )}
-            {isAdminOrUser && (
-                <>
-                    <div className="flex flex-col gap-2">
-                        <input
-                            className={`border-b focus:outline-none ${isTitleInvalid && title !== "" ? "border-primary" : "border-foreground"}`}
-                            placeholder="title"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
-
-                        <input
-                            className={`hide-arrows border-b focus:outline-none ${isYearInvalid ? "border-primary" : "border-foreground"}`}
-                            placeholder="year (≥ 1888)"
-                            value={year}
-                            onChange={(e) => setYear(e.target.value)}
-                            type="number"
-                        />
-
-                        <input
-                            className={`border-b focus:outline-none ${isGenreInvalid && genre !== "" ? "border-primary" : "border-foreground"}`}
-                            placeholder="genre (comma-separated)"
-                            value={genre}
-                            onChange={(e) => setGenre(e.target.value)}
-                        />
-                    </div>
-
-                    <button
-                        className="bg-primary hover:bg-primary-muted py-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                        type="submit"
-                        disabled={formInvalid}
-                    >
-                        .post
-                    </button>
-                </>
-            )}
+            <div className="flex flex-col gap-2">
+                <input
+                    className={`border-b focus:outline-none ${isTitleInvalid && title !== "" ? "border-primary" : "border-foreground"}`}
+                    placeholder="title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                />
+                <input
+                    className={`border-b focus:outline-none ${isYearInvalid ? "border-primary" : "border-foreground"}`}
+                    placeholder="year (≥ 1888)"
+                    value={year}
+                    onChange={(e) => setYear(e.target.value)}
+                    type="text"
+                    inputMode="numeric"
+                />
+                <input
+                    className={`border-b focus:outline-none ${isGenreInvalid && genre !== "" ? "border-primary" : "border-foreground"}`}
+                    placeholder="genre (comma-separated)"
+                    value={genre}
+                    onChange={(e) => setGenre(e.target.value)}
+                />
+            </div>
+            <button
+                className="bg-primary hover:bg-primary-muted py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                type="submit"
+                disabled={formInvalid || isLoading}
+            >
+                {isLoading ? "posting..." : ".post"}
+            </button>
         </form>
     );
 }

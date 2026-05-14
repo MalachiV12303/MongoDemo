@@ -8,9 +8,11 @@ type Props = {
   movies: MovieType[]
   onUpdateMovie: (id: string, source: string, payload: any) => void
   onDeleteMovie: (id: string, source: string) => void
+  isUpdating: boolean
+  isDeleting: boolean
 }
 
-export default function DataTable({ movies, onUpdateMovie, onDeleteMovie }: Props) {
+export default function DataTable({ movies, onUpdateMovie, onDeleteMovie, isUpdating, isDeleting }: Props) {
   const [editedYears, setEditedYears] = useState<Record<string, string>>({});
   const [editedNames, setEditedNames] = useState<Record<string, string>>({});
   const [editedGenres, setEditedGenres] = useState<Record<string, string>>({});
@@ -176,6 +178,8 @@ export default function DataTable({ movies, onUpdateMovie, onDeleteMovie }: Prop
           onGenreChange={handleGenreChange}
           onUpdate={handleUpdate}
           onDelete={handleDelete}
+          isUpdating={isUpdating}
+          isDeleting={isDeleting}
         />
       ))}
     </div>

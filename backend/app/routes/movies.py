@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from bson import ObjectId
 from app.database import sample_movies, user_movies
 from app.models.movie import Movie, MovieUpdate
 from app.auth.dependencies import get_current_user
+from app.limiter import limiter
 
 router = APIRouter()
 
@@ -21,7 +22,9 @@ def require_owner_or_admin(movie, user):
     
 # CREATE
 @router.post("/movies")
+@limiter.limit("2/minute")
 def create_movie(
+    request: Request,
     movie: Movie,
     user=Depends(get_current_user)
 ):
@@ -32,7 +35,9 @@ def create_movie(
 
 # GET with filtering
 @router.get("/movies")
+@limiter.limit("100/minute")
 def get_movies(
+    request: Request,
     title: str = None,
     lowerYear: int = None,
     upperYear: int = None,
@@ -109,8 +114,10 @@ def get_movies(
 
 # UPDATE
 @router.patch("/user-movies/{movie_id}")
+@limiter.limit("20/minute")
 def update_user_movie(
     movie_id: str,
+    request: Request,
     movie: MovieUpdate,
     user=Depends(get_current_user)
 ):
@@ -145,8 +152,10 @@ def update_user_movie(
     return {"message": "User movie updated"}
 
 @router.patch("/sample-movies/{movie_id}")
+@limiter.limit("20/minute")
 def update_sample_movie(
     movie_id: str,
+    request: Request,
     movie: MovieUpdate,
     user=Depends(get_current_user)
 ):
@@ -177,8 +186,10 @@ def update_sample_movie(
 
 # DELETE
 @router.delete("/user-movies/{movie_id}")
+@limiter.limit("10/minute")
 def delete_user_movie(
     movie_id: str,
+    request: Request,
     user=Depends(get_current_user)
 ):
     try:
@@ -198,8 +209,10 @@ def delete_user_movie(
     return {"message": "User movie deleted"}
 
 @router.delete("/sample-movies/{movie_id}")
+@limiter.limit("10/minute")
 def delete_sample_movie(
     movie_id: str,
+    request: Request,
     user=Depends(get_current_user)
 ):
     require_admin(user)

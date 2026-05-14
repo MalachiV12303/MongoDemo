@@ -16,6 +16,7 @@ type Props = {
     inputTableSelection: string
     setInputTableSelection: React.Dispatch<React.SetStateAction<string>>
     onSearch: () => void
+    isLoading: boolean
 }
 
 export default function SearchMovies({
@@ -33,7 +34,8 @@ export default function SearchMovies({
     setInputSampleLimit,
     inputTableSelection,
     setInputTableSelection,
-    onSearch
+    onSearch,
+    isLoading
 }: Props) {
     const lowerYearInvalid = yearInvalid(inputLowerYear);
     const upperYearInvalid =
@@ -116,10 +118,10 @@ export default function SearchMovies({
             </div>
             <button
                 onClick={onSearch}
-                disabled={hasInvalidSearch}
+                disabled={hasInvalidSearch || isLoading}
                 className="bg-primary hover:bg-primary-muted py-1 disabled:opacity-50 disabled:cursor-not-allowed col-span-2"
             >
-                .get
+                {isLoading ? "loading..." : ".get"}
             </button>
         </div>
     );

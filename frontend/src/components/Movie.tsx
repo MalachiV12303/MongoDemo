@@ -12,6 +12,8 @@ type Props = {
   onGenreChange: (id: string, value: string) => void;
   onUpdate: (movie: MovieType) => Promise<void>;
   onDelete: (movie: MovieType) => Promise<void>;
+  isUpdating: boolean;
+  isDeleting: boolean;
 };
 
 export default function Movie({
@@ -24,6 +26,8 @@ export default function Movie({
   onGenreChange,
   onUpdate,
   onDelete,
+  isUpdating,
+  isDeleting,
 }: Props) {
   const hasYearEdit = editedYears[movie._id] !== undefined;
   const hasNameEdit = editedNames[movie._id] !== undefined;
@@ -91,18 +95,19 @@ export default function Movie({
         {canDelete && (
           <button
             onClick={() => onDelete(movie)}
-            className="bg-primary hover:bg-primary-muted transition-colors px-2 w-full"
+            disabled={isDeleting}
+            className="bg-primary hover:bg-primary-muted transition-colors px-2 w-full disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            .delete
+            {isDeleting ? "deleting..." : ".delete"}
           </button>
         )}
         {canEdit && hasEdits && (
           <button
             onClick={() => onUpdate(movie)}
-            disabled={hasInvalidEdit}
+            disabled={hasInvalidEdit || isUpdating}
             className="bg-primary hover:bg-primary-muted transition-colors px-2 w-full disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            .patch
+            {isUpdating ? "patching..." : ".patch"}
           </button>
         )}
       </div>

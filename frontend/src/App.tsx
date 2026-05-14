@@ -5,6 +5,7 @@ import SearchMovies from "./components/SearchMovies";
 import DataTable from "./components/DataTable";
 import ThemeToggle from "./components/ThemeToggle";
 import Login from "./components/Login";
+import ErrorBanner from "./components/ErrorBanner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
@@ -18,7 +19,7 @@ export type Movie = {
 };
 
 function App() {
-  // Form state - updates on keystroke, doesn't trigger queries
+  // form state - updates on keystroke, doesn't trigger queries
   const [inputTitle, setInputTitle] = useState("")
   const [inputLowerYear, setInputLowerYear] = useState("")
   const [inputUpperYear, setInputUpperYear] = useState("")
@@ -27,7 +28,7 @@ function App() {
   const [inputUserLimit, setInputUserLimit] = useState("20")
   const [inputTableSelection, setInputTableSelection] = useState("all")
 
-  // Query params - only update when user clicks search
+  // query params - only update when user clicks search
   const [queryParams, setQueryParams] = useState({
     title: "",
     lowerYear: "",
@@ -40,9 +41,11 @@ function App() {
 
   const queryClient = useQueryClient();
 
-  // Fetch data based on query params (not input state)
+  // fetch data based on query params (not input state)
   const {
-    data: movies = []
+    data: movies = [],
+    isLoading,
+    error
   } = useQuery({
     queryKey: [
       "movies",
@@ -67,7 +70,7 @@ function App() {
     staleTime: 1000 * 60 * 5
   });
 
-  // Handle search button click - update query params
+  // handle search button click - update query params
   const handleSearch = () => {
     setQueryParams({
       title: inputTitle,
@@ -80,7 +83,7 @@ function App() {
     })
   }
 
-  // Mutations for add/edit/delete
+  // mutations for add/edit/delete
   const createMutation = useMutation({
     mutationFn: createMovieApi,
     onSuccess: () => {
@@ -104,15 +107,35 @@ function App() {
     }
   })
 
+  // get error messages from API responses
+  const getErrorMessage = (errorData: any): string => {
+    if (errorData?.response?.status === 429) {
+      return "Too many requests. Please wait a moment before trying again.";
+    }
+    if (errorData?.response?.status === 401) {
+      return "Unauthorized. Please log in and try again.";
+    }
+    if (typeof errorData?.response?.data?.detail === "string") {
+      return errorData.response.data.detail;
+    }
+    return "An error occurred. Please try again.";
+  }
+
+  const queryError = error ? getErrorMessage(error) : null;
+  const createError = createMutation.error ? getErrorMessage(createMutation.error) : null;
+  const updateError = updateMutation.error ? getErrorMessage(updateMutation.error) : null;
+  const deleteError = deleteMutation.error ? getErrorMessage(deleteMutation.error) : null;
+  const allErrors = [queryError, createError, updateError, deleteError].filter((err): err is string => err !== null);
+
   return (
     <main className="container mb-16">
       <nav className="flex items-center justify-between h-20">
         <h1 className="text-2xl font-semibold">demo-project</h1>
         <ThemeToggle />
       </nav>
-      <section className="">
+      <section className="flex flex-col gap-4">
         <Login />
-        <div className="grid grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-3 gap-4">
           <SearchMovies
             inputTitle={inputTitle}
             setInputTitle={setInputTitle}
@@ -129,17 +152,29 @@ function App() {
             inputTableSelection={inputTableSelection}
             setInputTableSelection={setInputTableSelection}
             onSearch={handleSearch}
+            isLoading={isLoading}
           />
-          <AddMovie onCreateMovie={createMutation.mutate} />
+          <AddMovie onCreateMovie={createMutation.mutate} isLoading={createMutation.isPending} />
         </div>
+        <ErrorBanner errors={allErrors} />
       </section>
       <section className="mt-12">
         <span className="text-sm text-foreground-muted">{JSON.stringify(queryParams)}</span>
-        <DataTable 
-          movies={movies} 
-          onUpdateMovie={(id, source, payload) => updateMutation.mutate({ id, source, payload })}
-          onDeleteMovie={(id, source) => deleteMutation.mutate({ id, source })}
-        />
+        {isLoading && (
+          <div className="flex items-center gap-2 p-4 text-foreground-muted">
+            <div className="animate-spin h-4 w-4 border-2 border-foreground border-t-transparent rounded-full"></div>
+            <span>Loading movies...</span>
+          </div>
+        )}
+        {!isLoading && (
+          <DataTable
+            movies={movies}
+            onUpdateMovie={(id, source, payload) => updateMutation.mutate({ id, source, payload })}
+            onDeleteMovie={(id, source) => deleteMutation.mutate({ id, source })}
+            isUpdating={updateMutation.isPending}
+            isDeleting={deleteMutation.isPending}
+          />
+        )}
       </section>
       <ReactQueryDevtools initialIsOpen={false} />
     </main>

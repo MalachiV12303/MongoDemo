@@ -20,15 +20,22 @@ deactivate
 - React  
 - TypeScript  
 - Tailwind CSS  
+- TanStack Query
+- Axios
 
 **Backend:**
 - FastAPI  
 - Python  
 - MongoDB Atlas  
+- JWT Authentication
+- Bcrypt
+- Pytest
+- SlowAPI
 
 ## To-Do:
-- React Protected Routes
-- Deploy with AWS, learn/add Terraform
+- Deploy project
+- Learn/use AWS
+- Add Terraform infrastructure setup
 
 ## Current Features
 - User authentication
@@ -67,3 +74,11 @@ deactivate
 - Linked created movie entries to specific users.  
 - Users can only edit/delete their own entries, while admins can manage all entries.  
 - Added pytest tests for backend endpoints — all currently passing.  
+
+### Day 4: May 14th 2026
+- Added React Query for data caching to reduce API calls for repeated queries.  
+- Added SlowAPI rate limiting to prevent login spam and brute force attacks by IP address.  
+- Added loading indicators while fetching movies.  
+- Added user-facing error messages for failed requests (including rate limit responses).  
+- Handled mutation errors and surfaced them in the UI.  
+- Added visual feedback on buttons during pending mutation states.  
