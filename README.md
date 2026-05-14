@@ -12,10 +12,9 @@ cd backend
 source venv/Scripts/activate  
 uvicorn app.main:app --reload  
 
-#### Exit Backend VENV
+### Exit Backend VENV
 deactivate  
 
-# Making Full-Stack Application
 ## Tech Stack
 **Frontend:**
 - React  
@@ -27,11 +26,11 @@ deactivate
 - Python  
 - MongoDB Atlas  
 
-### TO DO:
+## To-Do:
 - React Protected Routes
 - Deploy with AWS, learn/add Terraform
 
-### Current Features
+## Current Features
 - User authentication
 - CRUD functionality
 - Search/filter/sorting
@@ -40,14 +39,14 @@ deactivate
 - Frontend validation
 - Automated testing
 
-### Dev Log
-#### Day 1: May 11th 2026
+## Dev Log
+### Day 1: May 11th 2026
 - Built the initial full-stack project structure.  
 - Connected FastAPI backend to MongoDB Atlas.  
 - Created core API routes for GET, POST, PATCH, and DELETE requests.  
 - Verified frontend could successfully communicate with backend APIs.  
 
-#### Day 2: May 12th 2026
+### Day 2: May 12th 2026
 - Expanded API query functionality:
   - result limiting
   - filtering by value ranges
@@ -57,7 +56,7 @@ deactivate
 - Refactored both frontend and backend code to make things easier to scale as features get added.  
 - Cleaned up component structure and separated API logic from UI logic.  
 
-#### Day 3: May 13th 2026
+### Day 3: May 13th 2026
 - Added user authentication system.  
 - Stored user accounts in MongoDB.  
 - Implemented password hashing with bcrypt.  
