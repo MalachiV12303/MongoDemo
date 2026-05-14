@@ -13,6 +13,7 @@ type Props = {
 export default function DataTable({ movies, refreshMovies }: Props) {
   const [editedYears, setEditedYears] = useState<Record<string, string>>({});
   const [editedNames, setEditedNames] = useState<Record<string, string>>({});
+  const [editedGenres, setEditedGenres] = useState<Record<string, string>>({});
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const handleYearChange = (id: string, value: string) => {
@@ -24,6 +25,13 @@ export default function DataTable({ movies, refreshMovies }: Props) {
 
   const handleNameChange = (id: string, value: string) => {
     setEditedNames((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleGenreChange = (id: string, value: string) => {
+    setEditedGenres((prev) => ({
       ...prev,
       [id]: value,
     }));
@@ -44,6 +52,11 @@ export default function DataTable({ movies, refreshMovies }: Props) {
         payload.title = updatedName;
       }
 
+      const updatedGenres = editedGenres[movie._id];
+      if (updatedGenres !== undefined) {
+        payload.genres = updatedGenres.split(",").map((g: string) => g.trim()).filter(Boolean);
+      }
+
       if (Object.keys(payload).length === 0) {
         return;
       }
@@ -57,6 +70,12 @@ export default function DataTable({ movies, refreshMovies }: Props) {
       });
 
       setEditedNames((prev) => {
+        const updated = { ...prev };
+        delete updated[movie._id];
+        return updated;
+      });
+
+      setEditedGenres((prev) => {
         const updated = { ...prev };
         delete updated[movie._id];
         return updated;
@@ -154,8 +173,10 @@ export default function DataTable({ movies, refreshMovies }: Props) {
           movie={movie}
           editedYears={editedYears}
           editedNames={editedNames}
+          editedGenres={editedGenres}
           onYearChange={handleYearChange}
           onNameChange={handleNameChange}
+          onGenreChange={handleGenreChange}
           onUpdate={handleUpdate}
           onDelete={handleDelete}
         />

@@ -1,12 +1,15 @@
 import type { Movie as MovieType } from "../App";
 import { getCurrentUser } from "../lib/api";
+import { yearInvalid, titleInvalid, genreInvalid } from "../lib/validators";
 
 type Props = {
   movie: MovieType;
   editedYears: Record<string, string>;
   editedNames: Record<string, string>;
+  editedGenres: Record<string, string>;
   onYearChange: (id: string, value: string) => void;
   onNameChange: (id: string, value: string) => void;
+  onGenreChange: (id: string, value: string) => void;
   onUpdate: (movie: MovieType) => Promise<void>;
   onDelete: (movie: MovieType) => Promise<void>;
 };
@@ -15,14 +18,23 @@ export default function Movie({
   movie,
   editedYears,
   editedNames,
+  editedGenres,
   onYearChange,
   onNameChange,
+  onGenreChange,
   onUpdate,
   onDelete,
 }: Props) {
   const hasYearEdit = editedYears[movie._id] !== undefined;
   const hasNameEdit = editedNames[movie._id] !== undefined;
-  const hasEdits = hasYearEdit || hasNameEdit;
+  const hasGenreEdit = editedGenres[movie._id] !== undefined;
+  const hasEdits = hasYearEdit || hasNameEdit || hasGenreEdit;
+
+  const yearValue = editedYears[movie._id] ?? String(movie.year);
+  const isYearInvalid = hasYearEdit && yearInvalid(yearValue);
+  const isTitleInvalid = hasNameEdit && titleInvalid(editedNames[movie._id] ?? "");
+  const isGenreInvalid = hasGenreEdit && genreInvalid(editedGenres[movie._id] ?? "");
+  const hasInvalidEdit = isYearInvalid || isTitleInvalid || isGenreInvalid;
 
   const currentUser = getCurrentUser();
   const isAuthenticated = currentUser !== null;
@@ -40,23 +52,41 @@ export default function Movie({
           value={editedNames[movie._id] ?? movie.title}
           onChange={(e) => onNameChange(movie._id, e.target.value)}
           disabled={!canEdit}
-          className={`focus:outline-none w-full px-2 py-1 border border-foreground-muted disabled:border-0 ${
-            editedNames[movie._id] ? "text-primary" : "text-foreground"
+          className={`focus:outline-none w-full px-2 py-1 border disabled:border-0 ${
+            isTitleInvalid
+              ? "border-primary text-primary"
+              : editedNames[movie._id]
+              ? "border-foreground-muted text-primary"
+              : "border-foreground-muted text-foreground"
           }`}
         />
       </h3>
       <input
         type="number"
-        value={editedYears[movie._id] ?? movie.year}
+        value={yearValue}
         onChange={(e) => onYearChange(movie._id, e.target.value)}
         disabled={!canEdit}
-        className={`hide-arrows focus:outline-none px-2 py-1 border border-foreground-muted disabled:border-0 ${
-          editedYears[movie._id] ? "text-primary" : "text-foreground"
+        className={`hide-arrows focus:outline-none px-2 py-1 border disabled:border-0 ${
+          isYearInvalid
+            ? "border-primary text-primary"
+            : hasYearEdit
+            ? "border-foreground-muted text-primary"
+            : "border-foreground-muted text-foreground"
         }`}
       />
-      <p className="col-span-2">
-        {movie.genres?.join(", ") || "No genres listed"}
-      </p>
+      <input
+        type="text"
+        value={editedGenres[movie._id] ?? movie.genres?.join(", ")}
+        onChange={(e) => onGenreChange(movie._id, e.target.value)}
+        disabled={!canEdit}
+        className={`col-span-2 focus:outline-none px-2 py-1 border disabled:border-0 ${
+          isGenreInvalid
+            ? "border-primary text-primary"
+            : editedGenres[movie._id]
+            ? "border-foreground-muted text-primary"
+            : "border-foreground-muted text-foreground"
+        }`}
+      />
       <div className="flex gap-2">
         {canDelete && (
           <button
@@ -69,7 +99,8 @@ export default function Movie({
         {canEdit && hasEdits && (
           <button
             onClick={() => onUpdate(movie)}
-            className="bg-primary hover:bg-primary-muted transition-colors px-2 w-full"
+            disabled={hasInvalidEdit}
+            className="bg-primary hover:bg-primary-muted transition-colors px-2 w-full disabled:opacity-50 disabled:cursor-not-allowed"
           >
             .patch
           </button>
