@@ -37,6 +37,12 @@ deactivate
 - Learn/use AWS
 - Add Terraform infrastructure setup
 
+- Pagination
+- Centralized Error Handling
+- Internationalization
+- Microservices
+- Apache Kafka
+
 ## Current Features
 - User authentication
 - CRUD functionality
@@ -45,6 +51,7 @@ deactivate
 - Backend validation
 - Frontend validation
 - Automated testing
+- Data Caching
 
 ## Dev Log
 ### Day 1: May 11th 2026
